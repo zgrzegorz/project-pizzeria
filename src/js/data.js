@@ -18,12 +18,12 @@ dataSource.products = {//definicje produktów
     images: [
       '<img class="active" src="images/breakfast.svg">',
     ],
-    params: {
-      coffee: {
+    params: { //właściwości produktu2 breakfast
+      coffee: { //parametry klucz paramId:
         label: 'Coffee type',
         type: 'radios',
-        options: {
-          latte: { label: 'Latte', price: 1, default: true },
+        options: {//opcje dla danego parametru coffee typu radios
+          latte: { label: 'Latte', price: 1, default: true }, //@key klucz opcji nazwa opcji cena opcji
           cappuccino: { label: 'Cappuccino', price: 1 },
           espresso: { label: 'Espresso', price: 1 },
           macchiato: { label: 'Macchiato ', price: 1 },
@@ -46,11 +46,11 @@ dataSource.products = {//definicje produktów
       '<img class="active toppings-mushrooms" src="images/pizza/mushrooms.svg">',
       '<img class="active toppings-basil" src="images/pizza/basil.svg">',
     ],
-    params: {
-      sauce: {
-        label: 'Sauce',
-        type: 'radios',
-        options: {
+    params: {//właściwości produktu pizza
+      sauce: { //parametry klucz paramId:
+        label: 'Sauce',  //nazwa
+        type: 'radios',  //typ
+        options: { //opcje dla danego parametru typu radios
           tomato: { label: 'Tomato', price: 0, default: true },
           cream: { label: 'Sour cream', price: 2 },
         },

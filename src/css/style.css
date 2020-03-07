@@ -629,4 +629,8 @@ input, select {
   margin: 0 6px;
   padding: 0;
 }
+
+.product__order {
+  border: 2px solid red;
+}
 /*# sourceMappingURL=style.css.map */

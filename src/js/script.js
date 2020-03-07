@@ -58,40 +58,63 @@
       thisProduct.id = id;
       thisProduct.data = data;
       thisProduct.renderInMenu();
+      thisProduct.getElements();
       console.log('new Product:', thisProduct);
       thisProduct.initAccordion();
+      thisProduct.initOrderForm();
+      thisProduct.processOrder();
     }
     renderInMenu() {//deklaracja metody
       const thisProduct = this;
-      /*generate HTML based on template*/
+      console.log('nazwa produktu', thisProduct.id);
+      /*generate HTML based on template-wygenerować kod HTML pojedynczego produktu*/
       const generatedHTML = templates.menuProduct(thisProduct.data);
       console.log('generatedHTML:', generatedHTML);
-      /*create element using utils.createElementFromHTML*/
+      /*create element using utils.createElementFromHTML-stworzyć element DOM na podstawie tego kodu produktu, dodajemy do instancji nową właść.element*/
       thisProduct.element = utils.createDOMFromHTML(generatedHTML);
       console.log(thisProduct.element);
-      /*find menu container*/
+      /*find menu container-znaleźć na stronie kontener menu*/
       const menuContainer = document.querySelector(select.containerOf.menu);
-      /*add element to menu*/
+      /*add element to menu-wstawić stworzony element DOM do znalezionego kontenera menu*/
       menuContainer.appendChild(thisProduct.element);
+    }
+    getElements() {//metoda służy odnalezieniu elementów w kontenerze produktu <article> utworzonych za pomocą Handlebars
+      const thisProduct = this;
+      /*nagłówek header '.product__header'*/
+      thisProduct.accordionTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
+      console.log(thisProduct.accordionTrigger);
+      /*cały formularz form '.product__order'*/
+      thisProduct.form = thisProduct.element.querySelector(select.menuProduct.form);
+      console.log(thisProduct.form);
+      /*z formularza pobieramy wszystkie'input i select'*/
+      thisProduct.formInputs = thisProduct.form.querySelectorAll(select.all.formInputs);
+      console.log(thisProduct.formInputs);
+      /*link 1szt o atrybucie'[href="#add-to-cart"]'*/
+      thisProduct.cartButton = thisProduct.element.querySelector(select.menuProduct.cartButton);
+      console.log(thisProduct.cartButton);
+      /*span 1szt.wyświetlenie ceny'.product__total-price .price'*/
+      thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
+      console.log(thisProduct.priceElem);
     }
     initAccordion() {
       const thisProduct = this;
       /* find the clickable trigger (the element that should react to clicking) */
-      const tiggerHeader = thisProduct.element.querySelector(select.menuProduct.clickable);
-      console.log('tiggerHeader:', tiggerHeader);
-      /* START: click event listener to trigger */
-      tiggerHeader.addEventListener('click', function (event) {
+      //const tiggerHeader = thisProduct.element.querySelector(select.menuProduct.clickable);
+      //console.log('tiggerHeader:', tiggerHeader);
+      /* START: click event listener to trigger lub thisProduct.accordionTrigger*/
+      thisProduct.accordionTrigger.addEventListener('click', function (event) {
         console.log('Funkcja działa!');
         /* prevent default action for event */
         event.preventDefault();
-        /* toggle active class on element of thisProduct-dla bieżącego produktu */
+        /* toggle active class on element of thisProduct-dla bieżącego produktu <article class=active>*/
         thisProduct.element.classList.toggle(classNames.menuProduct.wrapperActive);
-        /* find all active products*/
+        /* find all active products-przeszukaj cały document a wnim elementy mające klasę product-list >product*/
         const activeProducts = document.querySelectorAll(select.all.menuProductsActive);
+        console.log(activeProducts);
         /* START LOOP: for each active product */
         for (let activeProduct of activeProducts) {
-          /* START: if the active product isn't the element of thisProduct*/
-          if (activeProduct != thisProduct.element) {
+          /* START: if the active product isn't the element of thisProduct różnią się całym zasobem produktów a nie tylko klassą active*/
+          if (activeProduct != thisProduct.element) { //thisProduct.element wskazuje element z klasą który dostał active
             console.log('jestem tu');
             /* remove class active for the active product */
             activeProduct.classList.remove(classNames.menuProduct.wrapperActive);
@@ -99,13 +122,73 @@
           }
           /* END LOOP: for each active product */
         }
-
       });
-
       /* END: click event listener to trigger */
     }
+    initOrderForm() { //wybieramy dodatki do produktów
+      const thisProduct = this;
+      thisProduct.form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        thisProduct.processOrder();
+        console.log('submit');
+      });
+
+      for (let input of thisProduct.formInputs) {
+        input.addEventListener('change', function () {
+          thisProduct.processOrder();
+        });
+      }
+
+      thisProduct.cartButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        thisProduct.processOrder();
+      });
+      console.log('Metoda initOrderForm:');
+    }
+    processOrder() { //oblicza cenę produktu dla wartości domyślnych i wybranych
+      const thisProduct = this;
+      console.log('Metoda processOrder:');
+      /* read all data from the form (using utils.serializeFormToObject) and save it to const formData */
+      const formData = utils.serializeFormToObject(thisProduct.form);
+      console.log('formData', formData);
+      /* set variable price to equal thisProduct.data.price */
+      let price = thisProduct.data.price;
+      console.log('price', price);
+      /* START LOOP: for each paramId in thisProduct.data.params */
+      for (let paramId in thisProduct.data.params) {
+        console.log('paramId', paramId);
+        /* save the element in thisProduct.data.params with key paramId as const param */
+        const param = thisProduct.data.params[paramId];
+        console.log('param', param);
+        /* START LOOP: for each optionId in param.options */
+        for (let optionId in param.options) {
+          /* save the element in param.options with key optionId as const option */
+          const option = param.options[optionId];
+          console.log('option', option);
+          /* START IF: if option is selected and option is not default */
+          const optionSelected = formData.hasOwnProperty(paramId) && formData[paramId].indexOf(optionId) > -1;
+          if (optionSelected && !option.default) {
+            /* add price of option to variable price */
+            price = price + option.price;
+            console.log('price', price);
+            /* END IF: if option is selected and option is not default */
+          }
+          else if (!optionSelected && option.default) {
+            /* START ELSE IF: if option is not selected and option is default */
+            /* deduct price of option from price */
+            price = price - option.price;
+            console.log('price', price);
+            /* END ELSE IF: if option is not selected and option is default */
+          }
+          /* END LOOP: for each optionId in param.options */
+        }
+        /* END LOOP: for each paramId in thisProduct.data.params */
+      }
+      /* set the contents of thisProduct.priceElem to be the value of variable price */
+      thisProduct.priceElem.innerHTML = price;
+    }
   }
-  //deklaracja app
+  //deklaracja obiektu app
   const app = {
     initMenu: function () {//deklaracja metody initMenu
       const thisApp = this;
@@ -118,12 +201,13 @@
       //const testProduct = new Product();
       //console.log('testProduct:', testProduct);
     },
+    //inicjalizacja danych
     initData: function () {
-      const thisApp = this;
+      const thisApp = this; //this wskazuje na obiekt app
       thisApp.data = dataSource;
     },
     init: function () {
-      const thisApp = this;
+      const thisApp = this; //this wskazuje na obiekt app
       console.log('*** App starting ***');
       console.log('thisApp:', thisApp);
       console.log('classNames:', classNames);
