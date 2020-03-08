@@ -62,6 +62,7 @@
       console.log('new Product:', thisProduct); //Product
       thisProduct.initAccordion();
       thisProduct.initOrderForm();
+      thisProduct.initAmountWidget();
       thisProduct.processOrder();
     }
     renderInMenu() {//deklaracja metody
@@ -100,6 +101,9 @@
       /*div przechowujący wszystkie img, div.'product__images'*/
       thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
       console.log('thisProduct.imageWrapper', thisProduct.id, thisProduct.imageWrapper);
+      /*zawartość div o class=widget-amount czyli elementy + i - ilości zamówień*/
+      thisProduct.amountWidgetElem = thisProduct.element.querySelector(select.menuProduct.amountWidget);
+      console.log('thisProduct.amountWidgetElem', thisProduct.id, thisProduct.amountWidgetElem);
     }
     initAccordion() { //wybór produktu do zakupu
       const thisProduct = this;
@@ -149,6 +153,15 @@
         thisProduct.processOrder();
       });
       console.log('Metoda initOrderForm:');
+    }
+    /*funkcja tworząca instancję klasy AmountWidget w oparciu o construktor klasy*/
+    initAmountWidget() {
+      const thisProduct = this;
+      thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
+      /*ustawienie nadsłuchiwania na zmiany w div amount-widget wbudowane zdarzenie event-updated*/
+      thisProduct.amountWidgetElem.addEventListener('updated', function () {
+        thisProduct.processOrder();
+      });
     }
     processOrder() { //oblicza cenę produktu dla wartości domyślnych i wybranych
       const thisProduct = this;
@@ -205,9 +218,65 @@
         }
         /* END LOOP: for each paramId in thisProduct.data.params */
       }
+      /*multiply price by amount ozn.pomnożenie ceny przez ilość sztuk wybraną w widgecie*/
+      price *= thisProduct.amountWidget.value;
       /* set the contents of thisProduct.priceElem to be the value of variable price */
       thisProduct.priceElem.innerHTML = price;
+    }
+  }
+  //deklaracja klasy AmountWidget
+  class AmountWidget {
+    constructor(element) {
+      const thisWidget = this;
+      thisWidget.getElements(element);//elementem bedzie div o klasie widget-amount
+      thisWidget.value = settings.amountWidget.defaultValue;
+      thisWidget.setValue(thisWidget.input.value);//przekazujemy do funkcji wartość jaka znajduje się lub wpisaliśmy do inputa typu text
+      thisWidget.initActions();
+      console.log('AmountWidget:', thisWidget);
+      console.log('constructor arguments:', element);//elementem bedzie div o klasie widget-amount
+    }
 
+    getElements(element) {
+      const thisWidget = this;
+      /*elementem bedzie div o klasie widget-amount*/
+      thisWidget.element = element;
+      /*na div widget-amount wyszukaj inputa o atrybucie input[name="amount"]*/
+      thisWidget.input = thisWidget.element.querySelector(select.widgets.amount.input);
+      /*na div widget-amount wyszukaj link o atrybucie a[href="#less"]*/
+      thisWidget.linkDecrease = thisWidget.element.querySelector(select.widgets.amount.linkDecrease);
+      /*na div widget-amount wyszukaj link o atrybucie a[href="#more"]*/
+      thisWidget.linkIncrease = thisWidget.element.querySelector(select.widgets.amount.linkIncrease);
+    }
+    setValue(value) {
+      const thisWidget = this;
+      const newValue = parseInt(value);//konwersja stringa na liczbę ponieważ input jest type="text"
+      /*TODO: Add validation*/
+      if (newValue != thisWidget.value && newValue >= settings.amountWidget.defaultMin && newValue <= settings.amountWidget.defaultMax) {
+        thisWidget.value = newValue;//dodanie do obiektu AmountWidget włąśc.value o wartości przekazanej z f.setValue
+        thisWidget.announce();//wywołanie eventu wbudowanego w przeglądarkę
+      }
+      thisWidget.input.value = thisWidget.value;//nadpisanie starej wartości value z inputa nową wartością newValue
+    }
+    initActions() {//metoda ustawia oczekiwanie na zdarzenie zawierająca 3 eventy
+      const thisWidget = this;
+      thisWidget.input.addEventListener('change', function () {
+        thisWidget.setValue(thisWidget.input.value);
+      });
+
+      thisWidget.linkDecrease.addEventListener('click', function (event) {
+        event.preventDefault();
+        thisWidget.setValue(thisWidget.value - 1);
+      });
+
+      thisWidget.linkIncrease.addEventListener('click', function (event) {
+        event.preventDefault();
+        thisWidget.setValue(thisWidget.value + 1);
+      });
+    }
+    announce() {//tworzy instancję w oparciu o klasę Event wbudowaną w przeglądarkę
+      const thisWidget = this;
+      const event = new Event('updated');
+      thisWidget.element.dispatchEvent(event);
     }
   }
   //deklaracja obiektu app
