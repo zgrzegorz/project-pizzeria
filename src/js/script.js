@@ -59,7 +59,7 @@
       thisProduct.data = data;
       thisProduct.renderInMenu();
       thisProduct.getElements();
-      console.log('new Product:', thisProduct);
+      console.log('new Product:', thisProduct); //Product
       thisProduct.initAccordion();
       thisProduct.initOrderForm();
       thisProduct.processOrder();
@@ -71,7 +71,7 @@
       const generatedHTML = templates.menuProduct(thisProduct.data);
       console.log('generatedHTML:', generatedHTML);
       /*create element using utils.createElementFromHTML-stworzyć element DOM na podstawie tego kodu produktu, dodajemy do instancji nową właść.element*/
-      thisProduct.element = utils.createDOMFromHTML(generatedHTML);
+      thisProduct.element = utils.createDOMFromHTML(generatedHTML); //div.firstChild
       console.log(thisProduct.element);
       /*find menu container-znaleźć na stronie kontener menu*/
       const menuContainer = document.querySelector(select.containerOf.menu);
@@ -86,6 +86,8 @@
       /*cały formularz form '.product__order'*/
       thisProduct.form = thisProduct.element.querySelector(select.menuProduct.form);
       console.log(thisProduct.form);
+      console.log(typeof (thisProduct.form));
+      console.log(thisProduct.form.nodeName);//szukamy we wł obiektu Product form _proto_ nodeName
       /*z formularza pobieramy wszystkie'input i select'*/
       thisProduct.formInputs = thisProduct.form.querySelectorAll(select.all.formInputs);
       console.log(thisProduct.formInputs);
@@ -95,8 +97,11 @@
       /*span 1szt.wyświetlenie ceny'.product__total-price .price'*/
       thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
       console.log(thisProduct.priceElem);
+      /*div przechowujący wszystkie img, div.'product__images'*/
+      thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
+      console.log('thisProduct.imageWrapper', thisProduct.id, thisProduct.imageWrapper);
     }
-    initAccordion() {
+    initAccordion() { //wybór produktu do zakupu
       const thisProduct = this;
       /* find the clickable trigger (the element that should react to clicking) */
       //const tiggerHeader = thisProduct.element.querySelector(select.menuProduct.clickable);
@@ -108,13 +113,13 @@
         event.preventDefault();
         /* toggle active class on element of thisProduct-dla bieżącego produktu <article class=active>*/
         thisProduct.element.classList.toggle(classNames.menuProduct.wrapperActive);
-        /* find all active products-przeszukaj cały document a wnim elementy mające klasę product-list >product*/
+        /* find all active products-przeszukaj cały document a wnim elementy mające klasę product-list >product czyli article*/
         const activeProducts = document.querySelectorAll(select.all.menuProductsActive);
         console.log(activeProducts);
         /* START LOOP: for each active product */
         for (let activeProduct of activeProducts) {
           /* START: if the active product isn't the element of thisProduct różnią się całym zasobem produktów a nie tylko klassą active*/
-          if (activeProduct != thisProduct.element) { //thisProduct.element wskazuje element z klasą który dostał active
+          if (activeProduct != thisProduct.element) { //thisProduct.element wskazuje element z klasą który został kliknięty i dostał active
             console.log('jestem tu');
             /* remove class active for the active product */
             activeProduct.classList.remove(classNames.menuProduct.wrapperActive);
@@ -127,13 +132,13 @@
     }
     initOrderForm() { //wybieramy dodatki do produktów
       const thisProduct = this;
-      thisProduct.form.addEventListener('submit', function (event) {
-        event.preventDefault();
+      thisProduct.form.addEventListener('submit', function (event) { //na formularzu ustaw event na submit type=text
+        event.preventDefault(); //jeżeli nastąpiło zdarzenie w formularzu wywołaj processOrder()
         thisProduct.processOrder();
         console.log('submit');
       });
 
-      for (let input of thisProduct.formInputs) {
+      for (let input of thisProduct.formInputs) { //dla wszystkich input i select jeżeli nastąpi zdarzenie zmiana wyboru wywołaj processOrder
         input.addEventListener('change', function () {
           thisProduct.processOrder();
         });
@@ -149,24 +154,30 @@
       const thisProduct = this;
       console.log('Metoda processOrder:');
       /* read all data from the form (using utils.serializeFormToObject) and save it to const formData */
+      /*odczytuje/przechowuje które opcje formularza zostały wybrane/zaznaczone z div.firstChild <article-form>*/
       const formData = utils.serializeFormToObject(thisProduct.form);
       console.log('formData', formData);
       /* set variable price to equal thisProduct.data.price */
+      /*odczyt ceny produktu jako wartości domyślnej*/
       let price = thisProduct.data.price;
-      console.log('price', price);
+      console.log('price', thisProduct.id, price);
       /* START LOOP: for each paramId in thisProduct.data.params */
-      for (let paramId in thisProduct.data.params) {
+      /*dla każdego pojedyńczego klucza obiektu params-pętla iterująca po parametrach*/
+      for (let paramId in thisProduct.data.params) { //pobierze klucze souce-topping-crust
         console.log('paramId', paramId);
         /* save the element in thisProduct.data.params with key paramId as const param */
-        const param = thisProduct.data.params[paramId];
+        const param = thisProduct.data.params[paramId]; //pobierze ich wartości pojedynczych kluczy {}
         console.log('param', param);
-        /* START LOOP: for each optionId in param.options */
-        for (let optionId in param.options) {
+        /* START LOOP: for each optionId in param.options-pętla iterująca po opcjach parametru */
+        for (let optionId in param.options) { //klucze tomato -cream/olive red peper
           /* save the element in param.options with key optionId as const option */
-          const option = param.options[optionId];
+          const option = param.options[optionId]; //pobierz odczytaj wartość obiektu options.tomato {}
           console.log('option', option);
           /* START IF: if option is selected and option is not default */
+          /*sprawdzenie które opcje są zaznaczone czy obiekt formData zawiera klucz o nazawie paramId oraz czy w obiekcie w tablicy pod indeksem jest klucz*/
           const optionSelected = formData.hasOwnProperty(paramId) && formData[paramId].indexOf(optionId) > -1;
+          console.log('optionId', optionId);
+          console.log('optionSelected', optionSelected);
           if (optionSelected && !option.default) {
             /* add price of option to variable price */
             price = price + option.price;
@@ -181,11 +192,22 @@
             /* END ELSE IF: if option is not selected and option is default */
           }
           /* END LOOP: for each optionId in param.options */
+          /*pobierz wszystkie elementy z div.product__images o klasie składającej się z paramId-optionId np.souce-tomato*/
+          const images = thisProduct.imageWrapper.querySelectorAll('.' + paramId + '-' + optionId);
+          for (let img of images) {
+            /*blok if-else jeżeli opcja zaznaczona dodaj klasę active w przeciwnym razie odbierz*/
+            if (optionSelected) {
+              img.classList.add(classNames.menuProduct.imageVisible);
+            } else {
+              img.classList.remove(classNames.menuProduct.imageVisible);
+            }
+          }
         }
         /* END LOOP: for each paramId in thisProduct.data.params */
       }
       /* set the contents of thisProduct.priceElem to be the value of variable price */
       thisProduct.priceElem.innerHTML = price;
+
     }
   }
   //deklaracja obiektu app
@@ -193,7 +215,7 @@
     initMenu: function () {//deklaracja metody initMenu
       const thisApp = this;
       console.log('thisApp.data', thisApp.data);
-      for (let productData in thisApp.data.products) {
+      for (let productData in thisApp.data.products) {//dla każdego klucza obiektu products
         new Product(productData, thisApp.data.products[productData]);
         console.log('productData:', productData);
         console.log(thisApp.data.products[productData]);

@@ -106,7 +106,7 @@
                 <li> <!-- select -->
                   <h3 class="product__params-title">{{{ label }}}</h3>
                   <select name="{{ paramId }}">
-                    {{#each options}}
+                    {{#each options}} <!--pole wyboru rozwijane opcji-->
                     <option value="{{ @key }}" {{#if default}}selected{{/if}}>{{{ label }}} (${{{ price }}})</option>
                     {{/each}}
                   </select>
