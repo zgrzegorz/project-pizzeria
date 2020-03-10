@@ -6,6 +6,7 @@
   const select = {
     templateOf: {
       menuProduct: '#template-menu-product',
+      cartProduct: '#template-cart-product', // CODE ADDED
     },
     containerOf: {
       menu: '#product-list',
@@ -26,11 +27,31 @@
     },
     widgets: {
       amount: {
-        input: 'input[name="amount"]',
+        input: 'input.amount', // CODE CHANGED input: 'input[name="amount"]',
         linkDecrease: 'a[href="#less"]',
         linkIncrease: 'a[href="#more"]',
       },
     },
+    // CODE ADDED START
+    cart: {
+      productList: '.cart__order-summary',
+      toggleTrigger: '.cart__summary',
+      totalNumber: `.cart__total-number`,
+      totalPrice: '.cart__total-price strong, .cart__order-total .cart__order-price-sum strong',
+      subtotalPrice: '.cart__order-subtotal .cart__order-price-sum strong',
+      deliveryFee: '.cart__order-delivery .cart__order-price-sum strong',
+      form: '.cart__order',
+      formSubmit: '.cart__order [type="submit"]',
+      phone: '[name="phone"]',
+      address: '[name="address"]',
+    },
+    cartProduct: {
+      amountWidget: '.widget-amount',
+      price: '.cart__product-price',
+      edit: '[href="#edit"]',
+      remove: '[href="#remove"]',
+    },
+    // CODE ADDED END
   };
 
   const classNames = {
@@ -38,6 +59,11 @@
       wrapperActive: 'active',
       imageVisible: 'active',
     },
+    // CODE ADDED START
+    cart: {
+      wrapperActive: 'active',
+    },
+    // CODE ADDED END
   };
 
   const settings = {
@@ -45,11 +71,19 @@
       defaultValue: 1,
       defaultMin: 1,
       defaultMax: 9,
-    }
+    }, // CODE CHANGED
+    // CODE ADDED START
+    cart: {
+      defaultDeliveryFee: 20,
+    },
+    // CODE ADDED END
   };
 
   const templates = {
     menuProduct: Handlebars.compile(document.querySelector(select.templateOf.menuProduct).innerHTML),
+    // CODE ADDED START
+    cartProduct: Handlebars.compile(document.querySelector(select.templateOf.cartProduct).innerHTML),
+    // CODE ADDED END
   };
 
   class Product {
@@ -158,7 +192,7 @@
     initAmountWidget() {
       const thisProduct = this;
       thisProduct.amountWidget = new AmountWidget(thisProduct.amountWidgetElem);
-      /*ustawienie nadsłuchiwania na zmiany w div amount-widget wbudowane zdarzenie event-updated*/
+      /*ustawienie nadsłuchiwania na zmiany w div widget-amount wbudowane zdarzenie event-updated*/
       thisProduct.amountWidgetElem.addEventListener('updated', function () {
         thisProduct.processOrder();
       });
@@ -229,7 +263,7 @@
     constructor(element) {
       const thisWidget = this;
       thisWidget.getElements(element);//elementem bedzie div o klasie widget-amount
-      thisWidget.value = settings.amountWidget.defaultValue;
+      thisWidget.value = settings.amountWidget.defaultValue;//początkowa wartość i poprzednia wartość
       thisWidget.setValue(thisWidget.input.value);//przekazujemy do funkcji wartość jaka znajduje się lub wpisaliśmy do inputa typu text
       thisWidget.initActions();
       console.log('AmountWidget:', thisWidget);
@@ -252,7 +286,7 @@
       const newValue = parseInt(value);//konwersja stringa na liczbę ponieważ input jest type="text"
       /*TODO: Add validation*/
       if (newValue != thisWidget.value && newValue >= settings.amountWidget.defaultMin && newValue <= settings.amountWidget.defaultMax) {
-        thisWidget.value = newValue;//dodanie do obiektu AmountWidget włąśc.value o wartości przekazanej z f.setValue
+        thisWidget.value = newValue;//dodanie do obiektu AmountWidget właśc.value o wartości przekazanej z f.setValue
         thisWidget.announce();//wywołanie eventu wbudowanego w przeglądarkę
       }
       thisWidget.input.value = thisWidget.value;//nadpisanie starej wartości value z inputa nową wartością newValue
