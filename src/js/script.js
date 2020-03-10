@@ -313,9 +313,33 @@
       thisWidget.element.dispatchEvent(event);
     }
   }
+  //deklaracja klasy Cart
+  class Cart {
+    constructor(element) {
+      const thisCart = this; //this wskazuje na new Cart
+      thisCart.products = []; //tablica przechowująca produkty dodane do koszyka
+      thisCart.getElements(element); //element będzie divem kontenerem koszyka
+      thisCart.initActions();
+      console.log('new Cart', thisCart);
+    }
+    getElements(element) {
+      const thisCart = this;
+      thisCart.dom = {}; //obiekt przechowujący wszystkie elementy DOM wyszukane w komponencie koszyka dla ułatwienia nazewnictwa
+      thisCart.dom.wrapper = element;//element będzie divem kontenerem koszyka
+      /*do obiektu dom dodajemy właściwość toggleTigger przechowującej div class="cart__summary"*/
+      thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
+    }
+    initActions() {//metoda będzie pokazywać i ukrywać koszyk produktów
+      const thisCart = this;
+      thisCart.dom.toggleTrigger.addEventListener('click', function (event) {
+        event.preventDefault();
+        thisCart.dom.wrapper.classList.toggle(classNames.cart.wrapperActive);
+      });
+    }
+  }
   //deklaracja obiektu app
   const app = {
-    initMenu: function () {//deklaracja metody initMenu
+    initMenu: function () {//deklaracja metody initMenu odpowiedz. za inicjowanie instancji Product
       const thisApp = this;
       console.log('thisApp.data', thisApp.data);
       for (let productData in thisApp.data.products) {//dla każdego klucza obiektu products
@@ -340,7 +364,14 @@
       console.log('templates:', templates);
       thisApp.initData();
       thisApp.initMenu();
+      thisApp.initCart();
     },
+    initCart: function () {//deklaracja metody initCart odpowiedz. za inicjowanie instancji Cart
+      const thisApp = this;
+      /*cała zawartość kontenera koszyka div id="cart" class="cart"*/
+      const cartElem = document.querySelector(select.containerOf.cart);
+      thisApp.cart = new Cart(cartElem); //ozn. to, że poza obiektem app możemy wywołać ją za pomocą app.cart
+    }
   };
   //wywołanie metod
   app.init();
