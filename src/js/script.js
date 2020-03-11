@@ -185,6 +185,7 @@
       thisProduct.cartButton.addEventListener('click', function (event) {
         event.preventDefault();
         thisProduct.processOrder();
+        thisProduct.addToCart();
       });
       console.log('Metoda initOrderForm:');
     }
@@ -204,19 +205,21 @@
       /*odczytuje/przechowuje które opcje formularza zostały wybrane/zaznaczone z div.firstChild <article-form>*/
       const formData = utils.serializeFormToObject(thisProduct.form);
       console.log('formData', formData);
+      /*nowa właśc. o wartości obiektu thisProduct.params przechowująca wybrane opcje*/
+      thisProduct.params = {};
       /* set variable price to equal thisProduct.data.price */
       /*odczyt ceny produktu jako wartości domyślnej*/
       let price = thisProduct.data.price;
       console.log('price', thisProduct.id, price);
       /* START LOOP: for each paramId in thisProduct.data.params */
       /*dla każdego pojedyńczego klucza obiektu params-pętla iterująca po parametrach*/
-      for (let paramId in thisProduct.data.params) { //pobierze klucze souce-topping-crust
+      for (let paramId in thisProduct.data.params) { //pobierze klucze souce-topping-crust, iteruje po parametrach
         console.log('paramId', paramId);
         /* save the element in thisProduct.data.params with key paramId as const param */
-        const param = thisProduct.data.params[paramId]; //pobierze ich wartości pojedynczych kluczy {}
+        const param = thisProduct.data.params[paramId]; //pobierze ich wartości pojedynczych kluczy {} label,type,options
         console.log('param', param);
         /* START LOOP: for each optionId in param.options-pętla iterująca po opcjach parametru */
-        for (let optionId in param.options) { //klucze tomato -cream/olive red peper
+        for (let optionId in param.options) { //klucze tomato -cream/olive red peper, iteruje po opcjach
           /* save the element in param.options with key optionId as const option */
           const option = param.options[optionId]; //pobierz odczytaj wartość obiektu options.tomato {}
           console.log('option', option);
@@ -242,9 +245,17 @@
           /*pobierz wszystkie elementy z div.product__images o klasie składającej się z paramId-optionId np.souce-tomato*/
           const images = thisProduct.imageWrapper.querySelectorAll('.' + paramId + '-' + optionId);
           for (let img of images) {
+            img.classList.add(classNames.menuProduct.imageVisible);
             /*blok if-else jeżeli opcja zaznaczona dodaj klasę active w przeciwnym razie odbierz*/
             if (optionSelected) {
-              img.classList.add(classNames.menuProduct.imageVisible);
+              if (!thisProduct.params[paramId]) { //czy dla danego klucza jest wartość
+                thisProduct.params[paramId] = {
+                  label: param.label, //Sauce
+                  options: {},
+                };
+              }
+              thisProduct.params[paramId].options[optionId] = option.label;//Tomato
+
             } else {
               img.classList.remove(classNames.menuProduct.imageVisible);
             }
@@ -252,10 +263,21 @@
         }
         /* END LOOP: for each paramId in thisProduct.data.params */
       }
+      console.log('Obiekt params z opcjami thisProduct.params', thisProduct.params);
       /*multiply price by amount ozn.pomnożenie ceny przez ilość sztuk wybraną w widgecie*/
-      price *= thisProduct.amountWidget.value;
+      //price *= thisProduct.amountWidget.value;
+      thisProduct.priceSingle = price; //właść.cena za jedną sztukę
+      thisProduct.price = thisProduct.priceSingle * thisProduct.amountWidget.value;//właść.cena za klika sztuk jednego produktu
       /* set the contents of thisProduct.priceElem to be the value of variable price */
-      thisProduct.priceElem.innerHTML = price;
+      //thisProduct.priceElem.innerHTML = price;
+      thisProduct.priceElem.innerHTML = thisProduct.price;
+    }
+    addToCart() {//metoda przekazująca wybrane produkty do metody koszyka
+      const thisProduct = this;
+      thisProduct.name = thisProduct.data.name;
+      thisProduct.amount = thisProduct.amountWidget.value;
+      app.cart.add(thisProduct);//wywołanie metody dodania produktów do koszyka, thisProduct bedzie wskazywał na całą instancję Product na product/-ty które wybrał użytkownik
+
     }
   }
   //deklaracja klasy AmountWidget
@@ -328,6 +350,8 @@
       thisCart.dom.wrapper = element;//element będzie divem kontenerem koszyka
       /*do obiektu dom dodajemy właściwość toggleTigger przechowującej div class="cart__summary"*/
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
+      /*do obiektu dom dodajemy właściwość productList przechowującą div class="cart__order-summary"*/
+      thisCart.dom.productList = thisCart.dom.wrapper.querySelector(select.cart.productList);
     }
     initActions() {//metoda będzie pokazywać i ukrywać koszyk produktów
       const thisCart = this;
@@ -335,6 +359,18 @@
         event.preventDefault();
         thisCart.dom.wrapper.classList.toggle(classNames.cart.wrapperActive);
       });
+    }
+    add(menuProduct) {//dodanie instancji produktu thisProduct do kosza
+      const thisCart = this;
+      console.log('dodany produkt', menuProduct);
+      /*generate HTML based on template-wygenerować kod HTML pojedynczego produktu wybranego przez użytkownika*/
+      const generatedHTML = templates.cartProduct(menuProduct);
+      console.log('generatedHTML:', generatedHTML);
+      /*create element using utils.createElementFromHTML-stworzyć element DOM na podstawie tego kodu produktu, dodajemy do instancji nową właść.element*/
+      const generatedDOM = utils.createDOMFromHTML(generatedHTML); //div.firstChild
+      console.log(generatedDOM);
+      /*add generatedDOM-przypisać do obiektu dom do właść. productList*/
+      thisCart.dom.productList.appendChild(generatedDOM);
     }
   }
   //deklaracja obiektu app

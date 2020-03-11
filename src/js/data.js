@@ -50,7 +50,7 @@ dataSource.products = {//definicje produktów
       sauce: { //parametry klucz paramId:
         label: 'Sauce',  //nazwa
         type: 'radios',  //typ
-        options: { //opcje dla danego parametru typu radios
+        options: { //opcje dla danego parametru typu radios optionId
           tomato: { label: 'Tomato', price: 0, default: true },
           cream: { label: 'Sour cream', price: 2 },
         },
