@@ -277,7 +277,7 @@
       thisProduct.name = thisProduct.data.name;
       thisProduct.amount = thisProduct.amountWidget.value;
       app.cart.add(thisProduct);//wywołanie metody dodania produktów do koszyka na instancji new Cart, thisProduct bedzie wskazywał na całą instancję Product na product/-ty które wybrał użytkownik
-
+      console.log(thisProduct);
     }
   }
   //deklaracja klasy AmountWidget
@@ -352,23 +352,28 @@
       thisCart.dom.wrapper = element;//element będzie divem kontenerem koszyka
       /*do obiektu dom dodajemy właściwość toggleTigger przechowującej div class="cart__summary"*/
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
-      /*do obiektu dom dodajemy właściwość productList przechowującą div class="cart__order-summary"*/
+      /*do obiektu dom dodajemy właściwość productList przechowującą div class="cart__order-summary" lista ul*/
       thisCart.dom.productList = thisCart.dom.wrapper.querySelector(select.cart.productList);
       //Aktualne sumy
       thisCart.renderTotalsKeys = ['totalNumber', 'totalPrice', 'subtotalPrice', 'deliveryFee'];
       for (let key of thisCart.renderTotalsKeys) {
-        thisCart.dom[key] = thisCart.dom.wrapper.querySelectorAll(select.cart[key]);
+        thisCart.dom[key] = thisCart.dom.wrapper.querySelectorAll(select.cart[key]);//1. span-cart__total-number 2.cart__total-price strong, cart__order-total .cart__order-price-sum strong 3. cart__order-subtotal .cart__order-price-sum strong 4.cart__order-delivery .cart__order-price-sum strong
+        console.log(thisCart.dom[key]);
       }
+      console.log(thisCart.dom);
     }
     initActions() {//metoda będzie pokazywać i ukrywać koszyk produktów
       const thisCart = this;
+      /*nasłuchiwanie na kliknięcie w nagłówek koszyka*/
       thisCart.dom.toggleTrigger.addEventListener('click', function (event) {
         event.preventDefault();
         thisCart.dom.wrapper.classList.toggle(classNames.cart.wrapperActive);
       });
+      /*nasłuchiwanie na zmianę na liscie produktów umieszczonych w koszyku*/
       thisCart.dom.productList.addEventListener('updated', function () {
         thisCart.update();
       });
+      /*nasłuchiwanie na usuniecie produktów z listy umieszczonych w koszyku*/
       thisCart.dom.productList.addEventListener('remove', function () {
         thisCart.remove(event.detail.cartProduct);
       });
@@ -409,7 +414,7 @@
       const thisCart = this;
       const index = thisCart.products.indexOf(cartProduct);
       thisCart.products.splice(index, 1);
-      cartProduct.dom.wrapper.remove();
+      cartProduct.dom.wrapper.remove(); //element DOM
       thisCart.update();
     }
   }
@@ -432,7 +437,7 @@
     getElements(element) {
       const thisCartProduct = this;
       thisCartProduct.dom = {};
-      thisCartProduct.dom.wrapper = element;
+      thisCartProduct.dom.wrapper = element;//
       thisCartProduct.dom.amountWidget = thisCartProduct.dom.wrapper.querySelector(select.cartProduct.amountWidget);
       thisCartProduct.dom.price = thisCartProduct.dom.wrapper.querySelector(select.cartProduct.price);
       thisCartProduct.dom.edit = thisCartProduct.dom.wrapper.querySelector(select.cartProduct.edit);
@@ -443,7 +448,6 @@
       thisCartProduct.amountWidget = new AmountWidget(thisCartProduct.dom.amountWidget);
       /*ustawienie nadsłuchiwania na zmiany w div widget-amount wbudowane zdarzenie event-updated*/
       thisCartProduct.dom.amountWidget.addEventListener('updated', function () {
-        console.log('hej');
         thisCartProduct.amount = thisCartProduct.amountWidget.value;
         thisCartProduct.price = thisCartProduct.priceSingle * thisCartProduct.amount;
         thisCartProduct.dom.price.innerHTML = thisCartProduct.price;
@@ -504,6 +508,7 @@
       const thisApp = this;
       /*cała zawartość kontenera koszyka div id="cart" class="cart"*/
       const cartElem = document.querySelector(select.containerOf.cart);
+      //console.log(cartElem);
       thisApp.cart = new Cart(cartElem); //ozn. to, że poza obiektem app możemy wywołać ją za pomocą app.cart, wywołując app.cart wywołamy utworzenie nowej instancji new Cart do której przekazujemy cały kontener koszyka
     }
   };

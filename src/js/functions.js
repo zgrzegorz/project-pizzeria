@@ -49,7 +49,7 @@ Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
   return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
 });
 */
-utils.convertDataSourceToDbJson = function () {
+utils.convertDataSourceToDbJson = function () { //konwersja dataSource.products na format JSON
   const productJson = [];
   for (let key in dataSource.products) {
     productJson.push(Object.assign({ id: key }, dataSource.products[key]));
