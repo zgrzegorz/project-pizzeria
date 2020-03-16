@@ -77,6 +77,12 @@
       defaultDeliveryFee: 20,
     },
     // CODE ADDED END
+    //parametry nie zbędne do łączenia z API
+    db: {
+      url: '//localhost:3131',
+      product: 'product',
+      order: 'order',
+    },
   };
 
   const templates = {
@@ -361,6 +367,9 @@
         console.log(thisCart.dom[key]);
       }
       console.log(thisCart.dom);
+      thisCart.dom.form = thisCart.dom.wrapper.querySelector(select.cart.form);
+      thisCart.dom.phone = thisCart.dom.wrapper.querySelector(select.cart.phone);
+      thisCart.dom.address = thisCart.dom.wrapper.querySelector(select.cart.address);
     }
     initActions() {//metoda będzie pokazywać i ukrywać koszyk produktów
       const thisCart = this;
@@ -376,6 +385,10 @@
       /*nasłuchiwanie na usuniecie produktów z listy umieszczonych w koszyku*/
       thisCart.dom.productList.addEventListener('remove', function () {
         thisCart.remove(event.detail.cartProduct);
+      });
+      thisCart.dom.form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        thisCart.sendOrder();
       });
     }
     add(menuProduct) {//dodanie instancji produktu thisProduct do kosza
@@ -417,6 +430,36 @@
       cartProduct.dom.wrapper.remove(); //element DOM
       thisCart.update();
     }
+    sendOrder() {
+      const thisCart = this;
+      const url = settings.db.url + '/' + settings.db.order;
+      const payload = {
+        phone: thisCart.dom.phone.value,
+        address: thisCart.dom.address.value,
+        //address: 'test',
+        totalNumber: thisCart.totalNumber,
+        subtotalPrice: thisCart.subtotalPrice,
+        totalPrice: thisCart.totalPrice,
+        deliveryFee: thisCart.deliveryFee,
+        products: [],
+      };
+      for (let product of thisCart.products) {
+        payload.products.push(product.getData()); //wynik metody zwracany to tablicy products
+      }
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      };
+      fetch(url, options)
+        .then(function (response) {
+          return response.json();
+        }).then(function (parsedResponse) {
+          console.log('parsedResponse', parsedResponse);
+        });
+    }
   }
   //deklaracja klasy CartProduct odpowiada za stan ilości sztuk-amount pojedyńczego produktu w koszyku
   class CartProduct {
@@ -427,7 +470,7 @@
       thisCartProduct.price = menuProduct.price;
       thisCartProduct.priceSingle = menuProduct.priceSingle;
       thisCartProduct.amount = menuProduct.amount;
-      thisCartProduct.param = JSON.parse(JSON.stringify(menuProduct.params));//w ten sposób klonujemy obiekt aby zachować kopię jego aktualnych wartości
+      thisCartProduct.params = JSON.parse(JSON.stringify(menuProduct.params));//w ten sposób klonujemy obiekt aby zachować kopię jego aktualnych wartości
       thisCartProduct.getElements(element);
       console.log('new CartProduct:', thisCartProduct);
       console.log('menuProduct:', menuProduct);
@@ -474,6 +517,17 @@
         console.log('wywołanie metody remove');
       });
     }
+    getData() {
+      const thisCartProduct = this;
+      const products = {
+        id: thisCartProduct.id,
+        amount: thisCartProduct.amount,
+        price: thisCartProduct.price,
+        priceSingle: thisCartProduct.priceSingle,
+        params: thisCartProduct.params,
+      };
+      return products;
+    }
   }
   //deklaracja obiektu app
   const app = {
@@ -481,7 +535,7 @@
       const thisApp = this;
       console.log('thisApp.data', thisApp.data);
       for (let productData in thisApp.data.products) {//dla każdego klucza obiektu products
-        new Product(productData, thisApp.data.products[productData]);
+        new Product(thisApp.data.products[productData].id, thisApp.data.products[productData]);
         console.log('productData:', productData);
         console.log(thisApp.data.products[productData]);
       }
@@ -491,7 +545,21 @@
     //inicjalizacja danych
     initData: function () {
       const thisApp = this; //this wskazuje na obiekt app
-      thisApp.data = dataSource;
+      //thisApp.data = dataSource; po wprowadzeniu API
+      thisApp.data = {};
+      const url = settings.db.url + '/' + settings.db.product;
+      fetch(url)//wysłanie zapytania pod adres endpointu
+        .then(function (rawResponse) {//otrzymana odp.konwertowana z JSON na tablicę
+          return rawResponse.json();
+        })
+        .then(function (parsedResponse) {//skonwertowana odp.
+          console.log('parsedResponse', parsedResponse);
+          /*save parsedResponse as thisApp.data.products*/
+          thisApp.data.products = parsedResponse;
+          /*execute initMenu method*/
+          thisApp.initMenu();
+        });
+      console.log('thisApp.data', JSON.stringify(thisApp.data));
     },
     init: function () {
       const thisApp = this; //this wskazuje na obiekt app
@@ -501,7 +569,7 @@
       console.log('settings:', settings);
       console.log('templates:', templates);
       thisApp.initData();
-      thisApp.initMenu();
+      //thisApp.initMenu();
       thisApp.initCart();
     },
     initCart: function () {//deklaracja metody initCart odpowiedz. za inicjowanie instancji Cart
