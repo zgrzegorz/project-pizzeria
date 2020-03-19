@@ -51,7 +51,8 @@ const app = {
     const cartElem = document.querySelector(select.containerOf.cart);
     //console.log(cartElem);
     thisApp.cart = new Cart(cartElem); //ozn. to, że poza obiektem app możemy wywołać ją za pomocą app.cart, wywołując app.cart wywołamy utworzenie nowej instancji new Cart do której przekazujemy cały kontener koszyka
-    thisApp.pdoductList.addEventListener('add-to-cart', function (event) {
+    thisApp.productList = document.querySelector(select.containerOf.menu);
+    thisApp.productList.addEventListener('add-to-cart', function (event) {
       app.cart.add(event.detail.product);
     });
   }

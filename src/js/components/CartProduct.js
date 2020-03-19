@@ -1,5 +1,5 @@
-import { select } from './settings.js';
-import AmountWidget from './components/AmountWidget.js';
+import { select } from '../settings.js';
+import AmountWidget from './AmountWidget.js';
 
 //deklaracja klasy CartProduct odpowiada za stan ilości sztuk-amount pojedyńczego produktu w koszyku
 class CartProduct {
