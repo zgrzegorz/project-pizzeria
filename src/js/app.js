@@ -8,8 +8,9 @@ const app = {
   //metoda obsługująca rezerwacje
   initBooking: function () {
     const thisApp = this;
-    const booking = document.querySelector(select.containerOf.booking);
-    thisApp.newBooking = new Booking(booking);
+    //bookingElement to div booking-wrapper
+    const bookingElement = document.querySelector(select.containerOf.booking);
+    thisApp.newBooking = new Booking(bookingElement);
 
   },
   //metoda obsługująca podstrony
@@ -30,6 +31,7 @@ const app = {
     }
     //spośród podstron pobieramy pierwszą o wskazanym id
     //thisApp.activatePage(thisApp.pages[0].id);
+    //console.log(pageMatchingHash);
     thisApp.activatePage(pageMatchingHash);
     //kliknięcie w link nawigacyjny
     for (let link of thisApp.navLinks) {
@@ -47,6 +49,7 @@ const app = {
   },
   activatePage: function (pageId) {
     const thisApp = this;
+    //console.log(pageId);
     /*add class "active" to matching pages, remove from non-matching*/
     for (let page of thisApp.pages) {
       /* if (page.id == pageId) {
@@ -54,7 +57,7 @@ const app = {
        } else {
          page.classList.remove(classNames.pages.active);
        }*/
-      page.classList.toggle(classNames.active, page.id == pageId); //jeżeli warunek będzie spałniony klasa activ zostanie dodana jeżeli nie zostanie odebrana
+      page.classList.toggle(classNames.pages.active, page.id == pageId); //jeżeli warunek będzie spałniony klasa active zostanie dodana jeżeli nie zostanie odebrana
     }
     /*add class "active" to matching links, remove from non-matching*/
     for (let link of thisApp.navLinks) {
@@ -63,7 +66,6 @@ const app = {
         link.getAttribute('href') == '#' + pageId
       );
     }
-
   },
   initMenu: function () {//deklaracja metody initMenu odpowiedz. za inicjowanie instancji Product
     const thisApp = this;

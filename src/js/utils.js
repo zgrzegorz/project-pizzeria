@@ -72,7 +72,7 @@ utils.hourToNumber = function (hour) {
 
   return parseInt(parts[0]) + parseInt(parts[1]) / 60;
 };
-
+// przekształca obiekt daty na tekst w formacie rok-miesiąc-dzień, czyli np. '2019-12-31'
 utils.dateToStr = function (dateObj) {
   return dateObj.toISOString().slice(0, 10);
 };
