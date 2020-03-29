@@ -6,6 +6,7 @@ class DatePicker extends BaseWidget {
   constructor(wrapper) { //wrapperem będzie div date-picker od instancji DatePicker
     super(wrapper, utils.dateToStr(new Date())); //super jest konstruktorem klasy nadrzędnej BaseWidget, a wrapper będzie wrapperem konstruktora DatePicker
     const thisWidget = this;
+    thisWidget.dom.wrapper = wrapper;
     thisWidget.dom.input = thisWidget.dom.wrapper.querySelector(select.widgets.datePicker.input);
     thisWidget.initPlugin();
   }

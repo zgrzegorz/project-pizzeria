@@ -6,6 +6,8 @@ class HourPicker extends BaseWidget {
   constructor(wrapper) { //wrapper to div hour-picker
     super(wrapper, settings.hours.open); //arg2. godz.12
     const thisWidget = this;
+    thisWidget.dom = {};
+    thisWidget.dom.wrapper = wrapper;
     thisWidget.dom.input = thisWidget.dom.wrapper.querySelector(select.widgets.hourPicker.input);//pobierzemy inputa
     thisWidget.dom.output = thisWidget.dom.wrapper.querySelector(select.widgets.hourPicker.output);//pobierzemy div output
     thisWidget.initPlugin();
