@@ -9,6 +9,7 @@ class HourPicker extends BaseWidget {
     thisWidget.dom.input = thisWidget.dom.wrapper.querySelector(select.widgets.hourPicker.input);//pobierzemy inputa
     thisWidget.dom.output = thisWidget.dom.wrapper.querySelector(select.widgets.hourPicker.output);//pobierzemy div output
     thisWidget.initPlugin();
+    thisWidget.value = thisWidget.dom.input.value;
   }
   initPlugin() {
     const thisWidget = this;
@@ -21,6 +22,7 @@ class HourPicker extends BaseWidget {
   }
   //nadpisanie metody parseValue
   parseValue(value) {
+    console.log(value);
     return utils.numberToHour(value);//zamiana liczb na zapis godzinowy
   }
   //nadpisanie metody isValid z klasy nadrzędnej BaseWidget przyjmuje true

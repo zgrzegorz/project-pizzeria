@@ -44,8 +44,7 @@ class DatePicker extends BaseWidget {
   }
   //nadpisanie metody renderValue
   renderValue() {
-    const thisWidget = this;
-    thisWidget.dom.wrapper.innerHTML = '';//nadpisanie starej wartości value z inputa nową wartością newValue
+    //console.log();
   }
 }
 export default DatePicker;

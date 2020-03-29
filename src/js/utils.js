@@ -69,7 +69,6 @@ utils.numberToHour = function (number) {
 
 utils.hourToNumber = function (hour) {
   const parts = hour.split(':');
-
   return parseInt(parts[0]) + parseInt(parts[1]) / 60;
 };
 // przekształca obiekt daty na tekst w formacie rok-miesiąc-dzień, czyli np. '2019-12-31'

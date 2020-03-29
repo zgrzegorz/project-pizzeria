@@ -1,5 +1,5 @@
 class BaseWidget {
-  constructor(wrapperElement, initialValue) { // wrapperElement jest div hours-amount i div people-amount z AmountWidget i div date-picker z klasy DatePicker
+  constructor(wrapperElement, initialValue) { // wrapperElement jest div hours-amount i div people-amount z AmountWidget i div date-picker z klasy DatePicker, div hour-picker z klasy HourPicker oraz div widget-amount z CartProduct
     const thisWidget = this;
     thisWidget.dom = {};
     thisWidget.dom.wrapper = wrapperElement;
